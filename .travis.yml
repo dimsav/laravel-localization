@@ -17,7 +17,7 @@ before_script:
   - composer require illuminate/support:"$LARAVEL_VERSION" --dev
   - composer install --prefer-source --no-interaction --dev
 
-script: phpunit -d memory_limit=1024M
+script: phpunit -d memory_limit=1024M --coverage-text
 
 matrix:
   fast_finish: true
