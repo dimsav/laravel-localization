@@ -1,7 +1,7 @@
 <?php namespace Mcamara\LaravelLocalization;
 
 use Illuminate\Config\Repository as Config;
-use Illuminate\View\Factory;
+use Illuminate\View\Factory      as View;
 use Illuminate\Translation\Translator;
 use Request;
 use Session;
@@ -71,13 +71,13 @@ class LaravelLocalization
      *
      *
      * @param Config $config
-     * @param \Illuminate\View\Factory $view
+     * @param View $view
      * @param \Illuminate\Translation\Translator $translator
      * @throws UnsupportedLocaleException
      */
 	public function __construct(
         Config $config,
-        Factory $view,
+        View $view,
         Translator $translator
     )
 	{
