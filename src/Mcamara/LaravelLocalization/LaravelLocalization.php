@@ -1,13 +1,12 @@
 <?php namespace Mcamara\LaravelLocalization;
 
-use Illuminate\Config\Repository;
-use Illuminate\View\Factory;
+use Illuminate\Config\Repository as Config;
+use Illuminate\View\Factory      as View;
 use Illuminate\Translation\Translator;
 use Request;
 use Session;
 use Cookie;
 use App;
-use Config;
 
 class LaravelLocalization
 {
@@ -16,7 +15,7 @@ class LaravelLocalization
 	 *
 	 * @var \Illuminate\Config\Repository
 	 */
-	protected $configRepository;
+	protected $config;
 
 	/**
 	 * Illuminate view Factory.
@@ -67,23 +66,27 @@ class LaravelLocalization
 	 */
 	protected $routesNames = array();
 
-	/**
-	 * Creates new instance.
+    /**
+     * Creates new instance.
      *
+     *
+     * @param Config $config
+     * @param View $view
+     * @param \Illuminate\Translation\Translator $translator
      * @throws UnsupportedLocaleException
-	 *
-	 * @param \Illuminate\Config\Repository $configRepository
-	 * @param \Illuminate\View\Factory $view
-	 * @param \Illuminate\Translation\Translator $translator
-	 */
-	public function __construct(Repository $configRepository, Factory $view, Translator $translator)
+     */
+	public function __construct(
+        Config $config,
+        View $view,
+        Translator $translator
+    )
 	{
-		$this->configRepository = $configRepository;
+		$this->config = $config;
 		$this->view = $view;
 		$this->translator = $translator;
 
 		// set default locale
-		$this->defaultLocale = Config::get('app.locale');
+		$this->defaultLocale = $this->config->get('app.locale');
         $supportedLocales = $this->getSupportedLocales();
         if (empty($supportedLocales[$this->defaultLocale])) {
             throw new UnsupportedLocaleException("Laravel's default locale is not in the supportedLocales array.");
@@ -349,7 +352,7 @@ class LaravelLocalization
 	 */
 	public function getURLFromRouteNameTranslated($locale, $transKeysNames = array(), $attributes = array())
 	{
-		if (!in_array($locale, array_keys($this->configRepository->get('laravel-localization::supportedLocales'))))
+		if (!in_array($locale, array_keys($this->config->get('laravel-localization::supportedLocales'))))
 		{
 			// if a locale is not accepted, return false
 			return false;
@@ -524,8 +527,8 @@ class LaravelLocalization
 	private function buildDeprecatedConfig()
 	{
 		//Use deprecated languagesAllowed & languagesSupported to build supportedLocales.
-		$allowed = $this->configRepository->get('laravel-localization::languagesAllowed');
-		$supported = $this->configRepository->get('laravel-localization::supportedLanguages');
+		$allowed = $this->config->get('laravel-localization::languagesAllowed');
+		$supported = $this->config->get('laravel-localization::supportedLanguages');
 
 		$locales = array();
 		foreach ($allowed as $localeCode)
@@ -550,12 +553,12 @@ class LaravelLocalization
 			return $this->supportedLocales;
 		}
 
-		if ($this->configRepository->has('laravel-localization::languagesAllowed') && $this->configRepository->has('laravel-localization::supportedLanguages')) {
+		if ($this->config->has('laravel-localization::languagesAllowed') && $this->config->has('laravel-localization::supportedLanguages')) {
 			$locales = $this->buildDeprecatedConfig();
 		}
 		else
 		{
-			$locales = $this->configRepository->get('laravel-localization::supportedLocales');
+			$locales = $this->config->get('laravel-localization::supportedLocales');
 		}
 
 		$this->supportedLocales = $locales;
@@ -636,7 +639,7 @@ class LaravelLocalization
 	 */
 	public function getLanguageBarClassName()
 	{
-		$className = $this->configRepository->get('laravel-localization::languageBarClass');
+		$className = $this->config->get('laravel-localization::languageBarClass');
 
 		return empty($className) ? 'laravel_language_chooser' : $className;
 	}
@@ -650,7 +653,7 @@ class LaravelLocalization
 	 */
 	public function getPrintCurrentLanguage()
 	{
-		$print = $this->configRepository->get('laravel-localization::printCurrentLanguageInBar');
+		$print = $this->config->get('laravel-localization::printCurrentLanguageInBar');
 		if (isset($print))
 		{
 			return $print;
@@ -689,7 +692,7 @@ class LaravelLocalization
 		}
 
 		// or get application default language
-		return $this->configRepository->get('app.locale');
+		return $this->config->get('app.locale');
 	}
 
 	/**
@@ -788,7 +791,7 @@ class LaravelLocalization
 	 */
 	private function useSessionLocale()
 	{
-		return $this->configRepository->get('laravel-localization::useSessionLocale') || $this->configRepository->get('laravel-localization::useSessionLanguage');
+		return $this->config->get('laravel-localization::useSessionLocale') || $this->config->get('laravel-localization::useSessionLanguage');
 	}
 
 	/**
@@ -798,7 +801,7 @@ class LaravelLocalization
 	 */
 	private function useCookieLocale()
 	{
-		return $this->configRepository->get('laravel-localization::useCookieLocale') || $this->configRepository->get('laravel-localization::useCookieLanguage');
+		return $this->config->get('laravel-localization::useCookieLocale') || $this->config->get('laravel-localization::useCookieLanguage');
 	}
 
 	/**
@@ -808,7 +811,7 @@ class LaravelLocalization
 	 */
 	private function useAcceptLanguageHeader()
 	{
-		return $this->configRepository->get('laravel-localization::useAcceptLanguageHeader') || $this->configRepository->get('laravel-localization::useBrowserLanguage');
+		return $this->config->get('laravel-localization::useAcceptLanguageHeader') || $this->config->get('laravel-localization::useBrowserLanguage');
 	}
 
 	/**
@@ -818,7 +821,7 @@ class LaravelLocalization
 	 */
 	public function hideDefaultLocaleInURL()
 	{
-		return $this->configRepository->get('laravel-localization::hideDefaultLocaleInURL') || $this->configRepository->get('laravel-localization::hideDefaultLanguageInRoute');
+		return $this->config->get('laravel-localization::hideDefaultLocaleInURL') || $this->config->get('laravel-localization::hideDefaultLanguageInRoute');
 	}
 
 	/**
@@ -866,9 +869,9 @@ class LaravelLocalization
 	 */
 	public function negotiateLanguage()
 	{
-		$default = $this->configRepository->get('app.locale');
+		$default = $this->config->get('app.locale');
 		$supported = array();
-		foreach ($this->configRepository->get('laravel-localization::supportedLocales') as $lang => $language)
+		foreach ($this->config->get('laravel-localization::supportedLocales') as $lang => $language)
 		{
 			$supported[$lang] = $lang;
 		}
