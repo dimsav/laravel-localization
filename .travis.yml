@@ -12,5 +12,13 @@ before_script:
 
 script: phpunit -d memory_limit=1024M --coverage-text && vendor/bin/phpspec run
 
+script:
+ - vendor/bin/phpspec run --config=spec/phpspec-cov-php.yml && phpunit -d memory_limit=1024M --coverage-php build/cov-files/phpunit.cov
+
+after_script:
+  - vendor/bin/phpcov merge --clover="build/coverage.clover" build/cov-files
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover build/coverage.clover
+
 matrix:
   fast_finish: true

@@ -1,0 +1,6 @@
+extensions:
+    - PhpSpec\Extension\CodeCoverageExtension
+
+code_coverage:
+    output: build/cov-files/phpspec.cov
+    format: php
