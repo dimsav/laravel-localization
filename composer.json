@@ -18,7 +18,9 @@
     },
     "require-dev": {
         "orchestra/testbench": "2.2.*",
-        "phpunit/phpunit": "~4.0"
+        "phpunit/phpunit": "~4.0",
+        "phpunit/phpcov": "*",
+        "phpspec/phpspec": "2.*@dev"
     },
     "autoload": {
         "classmap": [
