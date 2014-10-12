@@ -22,6 +22,7 @@
     },
     "autoload": {
         "classmap": [
+            "tests"
         ],
         "psr-0": {
             "Mcamara\\LaravelLocalization": "src/"
