@@ -65,13 +65,6 @@ class LaravelLocalization
 	protected $baseUrl;
 
 	/**
-	 * Default locale
-	 *
-	 * @var string
-	 */
-	protected $defaultLocale;
-
-	/**
 	 * Supported Locales
 	 *
 	 * @var array
@@ -121,11 +114,9 @@ class LaravelLocalization
 		$this->app = $app;
 		$this->request = $this->app['request'];
 
-		// set default locale
-		$this->defaultLocale = $this->configRepository->get('app.locale');
         $supportedLocales = $this->getSupportedLocales();
         
-        if (empty($supportedLocales[$this->defaultLocale])) 
+        if (empty($supportedLocales[$this->getDefaultLocale()]))
         {
             throw new UnsupportedLocaleException("Laravel's default locale is not in the supportedLocales array.");
         }
@@ -164,7 +155,7 @@ class LaravelLocalization
 			// we have to assume we are routing to a defaultLocale route.
 			if ($this->hideDefaultLocaleInURL())
 			{
-				$this->currentLocale = $this->defaultLocale;
+				$this->currentLocale = $this->getDefaultLocale();
 			}
 			// but if hideDefaultLocaleInURL is false, we have
 			// to retrieve it from the session/cookie/browser...
@@ -303,7 +294,7 @@ class LaravelLocalization
 			return $this->getURLFromRouteNameTranslated($locale, $translatedRoute, $attributes);
 		}
 
-		if (!empty($locale) && ($locale != $this->defaultLocale || !$this->hideDefaultLocaleInURL()))
+		if (!empty($locale) && ($locale != $this->getDefaultLocale() || !$this->hideDefaultLocaleInURL()))
 		{
 			$parsed_url['path'] = $locale . '/' . ltrim($parsed_url['path'], '/');
 		}
@@ -347,7 +338,7 @@ class LaravelLocalization
 
 		$route = "";
 
-		if (!($locale === $this->defaultLocale && $this->hideDefaultLocaleInURL()))
+		if (!($locale === $this->getDefaultLocale() && $this->hideDefaultLocaleInURL()))
 		{
 			$route = '/' . $locale;
 		}
@@ -399,7 +390,7 @@ class LaravelLocalization
 	 */
 	public function getDefaultLocale()
 	{
-		return $this->defaultLocale;
+		return $this->configRepository->get('app.locale');
 	}
 
 	/**
